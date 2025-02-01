@@ -32,14 +32,16 @@ with app.app_context(): # Ensures the app is in the correct context
 
 
 
+
+
 # Home Route
 @app.route('/')
 def index():
     tasks = Task.query.order_by(Task.created_at.desc()).all() # Fetch all tasks from the database
-    return render_template('index.html', task=tasks)
+    return render_template('index.html', tasks=tasks)
 
 # Add Task
-@app.route('/tasks', methods=['GET', 'POST'])
+@app.route('/add', methods=['GET', 'POST'])
 def add_task():
     form = TaskForm()
     if form.validate_on_submit():
@@ -49,7 +51,7 @@ def add_task():
             description=form.description.data,
             priority=form.priority.data,
             due_date=form.due_date.data if form.due_date.data else None,
-            is_complete=form.is_complete.raw_data
+            is_complete=form.is_complete.data
         )
         db.session.add(task)
         db.session.commit()
@@ -75,7 +77,7 @@ def edit_task(task_id):
     return render_template('edit_task.html', form=form, task=task)
 
 # Delete Task
-@app.route('/delete/<int:id>', methods=['POST'])
+@app.route('/delete/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id) # Fetch task by ID
     db.session.delete(task) # Remove from database
@@ -84,7 +86,7 @@ def delete_task(task_id):
     return redirect(url_for('index')) # Refresh page
 
 # Mark Task as Completed
-@app.route('/toggle_complete/<int:id>', methods=['POST'])
+@app.route('/toggle_complete/<int:task_id>', methods=['POST'])
 def toggle_complete(task_id):
     task = Task.query.get_or_404(task_id)
     task.is_complete = not task.is_complete # Update status

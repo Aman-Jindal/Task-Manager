@@ -1,1 +1,44 @@
- 
+ {% extends 'base.html' %}
+
+ {% block content %}
+ <h1 class="mb-4">Your Tasks</h1>
+
+ {% if tasks %}
+    <div class="list-group">
+        {% for task in tasks %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="{{ 'text-decoration-line-through' if task.is_complete }}">{{ task.title }}</h5>
+                    {% if task.description %}
+                        <p class="mb-1">{{ task.description }}</p>
+                    {% endif %}
+                    <small>
+                        Priority: <span clas="badge bg-info">{{ task.priority }}</span>
+                        {% if task.due_date %}
+                            | Due: {{ task.due_date.strftime('%Y-%m-%d') }}
+                        {% endif %}
+                    </small>
+                </div>
+                <div>
+                    <!-- Toggle Complete Button -->
+                     <button class="btn btn-sm btn-outline-success me-2 toggle-complete" data-task-id="{{ task.id }}">
+                        {% if task.is_complete %}
+                            Mark Incomplete
+                        {% else %}
+                            Mark Complete
+                        {% endif %}
+                     </button>
+                     <!-- Edit -->
+                      <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-sm btn-primary me-2">Edit</a>
+                      <!-- Delete (using a small form to POST) -->
+                       <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST" style="display: inline-block;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                       </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No tasks yet. <a href="{{ url_for('add_task') }}">Add one!</a></p>
+{% endif %}
+{% endblock %}
